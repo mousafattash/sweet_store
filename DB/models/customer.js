@@ -1,17 +1,20 @@
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  const Customer = sequelize.define('Customer', {
-    customer_id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-    },
-    loyalty_id: DataTypes.STRING,
-    registration_date: DataTypes.DATE,
-  }, {
-    tableName: 'customer',
-    timestamps: false,
-  });
+    const Customer = sequelize.define('Customer', {
+        customer_id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+        },
+        registration_date: {
+          type: DataTypes.DATE,
+          defaultValue: DataTypes.NOW,
+        },
+      }, {
+        tableName: 'customer',
+        timestamps: false,
+      });
+      
 
   Customer.associate = (models) => {
     Customer.belongsTo(models.People, { foreignKey: 'customer_id', as: 'person', onDelete: 'CASCADE' });
