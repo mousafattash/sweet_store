@@ -1,24 +1,27 @@
-import jwt from "jsonwebtoken";
-import { asyncHandler } from "./catchError.js";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const protect = asyncHandler(async (req, res, next) => {
-  const authHeader = req.header("Authorization");
+export const auth=(accessRoles=[])=> {
+    return async (req, res, next) => {
+        const token = req.headers['authorization'];
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
+        try {
+            const decoded = jwt.verify(token, process.env.login_signature);
+            const user=await User.findById(decoded.id);
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    const err = new Error("No token, authorization denied");
-    err.statusCode = 401;
-    throw err;
-  }
+            
+            if(accessRoles.includes(user.role)){
+                return res.status(403).json({ message: 'Forbidden' });
+            }
+            
+        
 
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // You can access this in your routes
-    next();
-  } catch (err) {
-    err.statusCode = 401;
-    err.message = "Token is not valid or expired";
-    throw err;
-  }
-});
+        } catch (error) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+    };
+}
