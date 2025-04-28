@@ -5,8 +5,6 @@ export default (sequelize) => {
     date: DataTypes.DATEONLY,
     start_time: DataTypes.TIME,
     end_time: DataTypes.TIME,
-    working_hours: DataTypes.DECIMAL,
-    is_present: DataTypes.BOOLEAN,
   }, {
     tableName: 'employee_shift',
     timestamps: false,

@@ -1,2 +1,4 @@
+.env*
+!.env.project
+.env.me
 node_modules
-.env

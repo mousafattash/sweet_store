@@ -20,7 +20,7 @@ export default (sequelize) => {
     Branch.hasMany(models.Employee_Shift,     { foreignKey: 'branch_id',     as: 'shifts' });
     Branch.hasMany(models.Branch_Management,  { foreignKey: 'branch_id',     as: 'managements' });
     Branch.hasMany(models.Branch_Expenses,    { foreignKey: 'branch_id',     as: 'expenses' });
-    Branch.hasMany(models.Inventory,          { foreignKey: 'branch_id',     as: 'inventories' });
+    Branch.hasOne(models.Inventory,          { foreignKey: 'branch_id',     as: 'inventories' });
   };
 
   return Branch;
