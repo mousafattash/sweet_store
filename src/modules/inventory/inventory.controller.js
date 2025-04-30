@@ -25,13 +25,13 @@ export const getAllInventory = async (req, res) => {
 /**
  * Get inventory by branch
  */
-export const getInventoryByBranch = async (req, res, next) => {
+export const getInventoryByBranch = async (req, res) => {
   const { branch_id } = req.params;
   
   // Check if branch exists
   const branch = await models.Branch.findByPk(branch_id);
   if (!branch) {
-    return next(new AppError('Branch not found', 404));
+    throw new AppError('Branch not found', 404);
   }
   
   const inventory = await models.Inventory.findAll({
@@ -54,13 +54,13 @@ export const getInventoryByBranch = async (req, res, next) => {
 /**
  * Get inventory by raw material
  */
-export const getInventoryByMaterial = async (req, res, next) => {
+export const getInventoryByMaterial = async (req, res) => {
   const { material_id } = req.params;
   
   // Check if material exists
   const material = await models.Raw_Material.findByPk(material_id);
   if (!material) {
-    return next(new AppError('Raw material not found', 404));
+    throw new AppError('Raw material not found', 404);
   }
   
   const inventory = await models.Inventory.findAll({
@@ -83,19 +83,19 @@ export const getInventoryByMaterial = async (req, res, next) => {
 /**
  * Update inventory (create if not exists)
  */
-export const updateInventory = async (req, res, next) => {
+export const updateInventory = async (req, res) => {
   const { branch_id, raw_material_id, quantity } = req.body;
   
   // Check if branch exists
   const branch = await models.Branch.findByPk(branch_id);
   if (!branch) {
-    return next(new AppError('Branch not found', 404));
+    throw new AppError('Branch not found', 404);
   }
   
   // Check if material exists
   const material = await models.Raw_Material.findByPk(raw_material_id);
   if (!material) {
-    return next(new AppError('Raw material not found', 404));
+    throw new AppError('Raw material not found', 404);
   }
   
   // Find or create inventory record
@@ -126,7 +126,7 @@ export const updateInventory = async (req, res, next) => {
 /**
  * Delete inventory record
  */
-export const deleteInventory = async (req, res, next) => {
+export const deleteInventory = async (req, res) => {
   const { branch_id, raw_material_id } = req.params;
   
   const inventory = await models.Inventory.findOne({
@@ -134,7 +134,7 @@ export const deleteInventory = async (req, res, next) => {
   });
   
   if (!inventory) {
-    return next(new AppError('Inventory record not found', 404));
+    throw new AppError('Inventory record not found', 404);
   }
   
   await inventory.destroy();

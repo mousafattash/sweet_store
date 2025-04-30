@@ -17,13 +17,13 @@ const generateToken = (id) => {
 /**
  * Register a new user
  */
-export const register = async (req, res, next) => {
+export const register = async (req, res) => {
   const { first_name, last_name, email, password, type = 'person' } = req.body;
   
   // Check if user already exists
   const existingUser = await models.People.findOne({ where: { email } });
   if (existingUser) {
-    return next(new AppError('Email already in use', 400));
+    throw new AppError('Email already in use', 400);
   }
   
   // Hash password
@@ -73,12 +73,12 @@ export const register = async (req, res, next) => {
 /**
  * Login user
  */
-export const login = async (req, res, next) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
   
   // Check if email and password exist
   if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
+    throw new AppError('Please provide email and password', 400);
   }
   
   // Find user
@@ -89,7 +89,7 @@ export const login = async (req, res, next) => {
   
   // Check if user exists and password is correct
   if (!person || !person.Customer || !(await bcrypt.compare(password, person.Customer.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    throw new AppError('Incorrect email or password', 401);
   }
   
   // Generate token
@@ -132,14 +132,14 @@ export const getProfile = async (req, res) => {
 /**
  * Update user profile
  */
-export const updateProfile = async (req, res, next) => {
+export const updateProfile = async (req, res) => {
   const { first_name, last_name, email } = req.body;
   
   // Check if email is already taken
   if (email && email !== req.user.email) {
     const existingUser = await models.People.findOne({ where: { email } });
     if (existingUser) {
-      return next(new AppError('Email already in use', 400));
+      throw new AppError('Email already in use', 400);
     }
   }
   
@@ -168,7 +168,7 @@ export const updateProfile = async (req, res, next) => {
 /**
  * Change password
  */
-export const changePassword = async (req, res, next) => {
+export const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   
   // Get user with password
@@ -178,7 +178,7 @@ export const changePassword = async (req, res, next) => {
   
   // Check current password
   if (!(await bcrypt.compare(currentPassword, user.Customer.password))) {
-    return next(new AppError('Current password is incorrect', 401));
+    throw new AppError('Current password is incorrect', 401);
   }
   
   // Hash new password
@@ -201,7 +201,7 @@ export const changePassword = async (req, res, next) => {
 /**
  * Request password reset
  */
-export const forgotPassword = async (req, res, next) => {
+export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   
   // Find user
@@ -211,7 +211,7 @@ export const forgotPassword = async (req, res, next) => {
   });
   
   if (!user || !user.Customer) {
-    return next(new AppError('No user found with that email', 404));
+    throw new AppError('No user found with that email', 404);
   }
   
   // Generate reset token
@@ -243,14 +243,14 @@ export const forgotPassword = async (req, res, next) => {
       reset_token_expires: null,
     });
     
-    return next(new AppError('Error sending email. Please try again later.', 500));
+    throw new AppError('Error sending email. Please try again later.', 500);
   }
 };
 
 /**
  * Reset password
  */
-export const resetPassword = async (req, res, next) => {
+export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
   
@@ -274,7 +274,7 @@ export const resetPassword = async (req, res, next) => {
   }
   
   if (!user) {
-    return next(new AppError('Token is invalid or has expired', 400));
+    throw new AppError('Token is invalid or has expired', 400);
   }
   
   // Hash new password

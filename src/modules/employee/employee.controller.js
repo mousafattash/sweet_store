@@ -27,7 +27,7 @@ export const getAllEmployees = async (req, res) => {
 /**
  * Get employee by ID
  */
-export const getEmployeeById = async (req, res, next) => {
+export const getEmployeeById = async (req, res) => {
   const { id } = req.params;
   
   const employee = await models.Employee.findByPk(id, {
@@ -40,7 +40,7 @@ export const getEmployeeById = async (req, res, next) => {
   });
   
   if (!employee) {
-    return next(new AppError('Employee not found', 404));
+    throw new AppError('Employee not found', 404);
   }
   
   res.status(200).json({
@@ -54,7 +54,7 @@ export const getEmployeeById = async (req, res, next) => {
 /**
  * Create a new employee
  */
-export const createEmployee = async (req, res, next) => {
+export const createEmployee = async (req, res) => {
   const { 
     identity_card, 
     first_name, 
@@ -72,7 +72,7 @@ export const createEmployee = async (req, res, next) => {
   // Check if person already exists
   const existingPerson = await models.People.findOne({ where: { identity_card } });
   if (existingPerson) {
-    return next(new AppError('Person with this identity card already exists', 400));
+    throw new AppError('Person with this identity card already exists', 400);
   }
   
   // Start a transaction
@@ -129,14 +129,14 @@ export const createEmployee = async (req, res, next) => {
   } catch (error) {
     // Rollback transaction on error
     await transaction.rollback();
-    return next(new AppError(error.message, 400));
+    throw new AppError(error.message, 400);
   }
 };
 
 /**
  * Update an employee
  */
-export const updateEmployee = async (req, res, next) => {
+export const updateEmployee = async (req, res) => {
   const { id } = req.params;
   const { 
     first_name, 
@@ -153,7 +153,7 @@ export const updateEmployee = async (req, res, next) => {
   // Find the employee
   const employee = await models.Employee.findByPk(id);
   if (!employee) {
-    return next(new AppError('Employee not found', 404));
+    throw new AppError('Employee not found', 404);
   }
   
   // Start a transaction
@@ -235,20 +235,32 @@ export const updateEmployee = async (req, res, next) => {
   } catch (error) {
     // Rollback transaction on error
     await transaction.rollback();
-    return next(new AppError(error.message, 400));
+    throw new AppError(error.message, 400);
   }
 };
 
 /**
  * Delete an employee
  */
-export const deleteEmployee = async (req, res, next) => {
+export const deleteEmployee = async (req, res) => {
   const { id } = req.params;
   
   // Find the employee
   const employee = await models.Employee.findByPk(id);
   if (!employee) {
-    return next(new AppError('Employee not found', 404));
+    throw new AppError('Employee not found', 404);
+  }
+  
+  // Check for associated shifts
+  const shifts = await models.Employee_Shift.findAll({ where: { employee_id: id } });
+  if (shifts.length > 0) {
+    throw new AppError('Cannot delete employee with associated shifts. Please reassign or delete the shifts first.', 400);
+  }
+  
+  // Check for associated orders (if employee is assigned to orders)
+  const orders = await models.Order.findAll({ where: { employee_id: id } });
+  if (orders.length > 0) {
+    throw new AppError('Cannot delete employee with associated orders. Please reassign the orders first.', 400);
   }
   
   // Start a transaction
@@ -274,6 +286,6 @@ export const deleteEmployee = async (req, res, next) => {
   } catch (error) {
     // Rollback transaction on error
     await transaction.rollback();
-    return next(new AppError(error.message, 400));
+    throw new AppError(error.message, 400);
   }
 };

@@ -100,6 +100,8 @@ const schemas = {
       .messages({
         'any.only': 'Status must be one of: pending, processing, shipped, delivered, cancelled',
       }),
+  }).min(1).messages({
+    'object.min': 'At least one field must be provided for update'
   }),
 
   // Get order by ID validation

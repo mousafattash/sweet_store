@@ -66,6 +66,8 @@ const schemas = {
         'number.base': 'Quantity must be a number',
         'any.required': 'Quantity is required',
       }),
+  }).min(1).messages({
+    'object.min': 'At least one field must be provided for update'
   }),
 
   // Get inventory by branch validation

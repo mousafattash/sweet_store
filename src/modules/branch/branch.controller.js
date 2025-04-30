@@ -20,7 +20,7 @@ export const getAllBranches = async (req, res) => {
 /**
  * Get branch by ID
  */
-export const getBranchById = async (req, res, next) => {
+export const getBranchById = async (req, res) => {
   const { id } = req.params;
   
   const branch = await models.Branch.findByPk(id, {
@@ -31,7 +31,7 @@ export const getBranchById = async (req, res, next) => {
   });
   
   if (!branch) {
-    return next(new AppError('Branch not found', 404));
+    throw new AppError('Branch not found', 404);
   }
   
   res.status(200).json({
@@ -66,14 +66,14 @@ export const createBranch = async (req, res) => {
 /**
  * Update branch
  */
-export const updateBranch = async (req, res, next) => {
+export const updateBranch = async (req, res) => {
   const { id } = req.params;
   const { branch_name, address, city, postal_code, country, phone } = req.body;
   
   const branch = await models.Branch.findByPk(id);
   
   if (!branch) {
-    return next(new AppError('Branch not found', 404));
+    throw new AppError('Branch not found', 404);
   }
   
   // Prepare updated address if any address components are provided
@@ -107,13 +107,13 @@ export const updateBranch = async (req, res, next) => {
 /**
  * Delete branch
  */
-export const deleteBranch = async (req, res, next) => {
+export const deleteBranch = async (req, res) => {
   const { id } = req.params;
   
   const branch = await models.Branch.findByPk(id);
   
   if (!branch) {
-    return next(new AppError('Branch not found', 404));
+    throw new AppError('Branch not found', 404);
   }
   
   // Check if branch has associated data
@@ -122,7 +122,7 @@ export const deleteBranch = async (req, res, next) => {
   const shifts = await models.Employee_Shift.findAll({ where: { branch_id: id } });
   
   if (inventories.length > 0 || expenses.length > 0 || shifts.length > 0) {
-    return next(new AppError('Cannot delete branch with associated data', 400));
+    throw new AppError('Cannot delete branch with associated data', 400);
   }
   
   await branch.destroy();

@@ -20,7 +20,7 @@ export const getAllProducts = async (req, res) => {
 /**
  * Get product by ID
  */
-export const getProductById = async (req, res, next) => {
+export const getProductById = async (req, res) => {
   const { id } = req.params;
   
   const product = await models.Product.findByPk(id, {
@@ -28,7 +28,7 @@ export const getProductById = async (req, res, next) => {
   });
   
   if (!product) {
-    return next(new AppError('Product not found', 404));
+    throw new AppError('Product not found', 404);
   }
   
   res.status(200).json({
@@ -62,14 +62,14 @@ export const createProduct = async (req, res) => {
 /**
  * Update product
  */
-export const updateProduct = async (req, res, next) => {
+export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { product_name, description, base_price } = req.body;
   
   const product = await models.Product.findByPk(id);
   
   if (!product) {
-    return next(new AppError('Product not found', 404));
+    throw new AppError('Product not found', 404);
   }
   
   await product.update({
@@ -89,13 +89,13 @@ export const updateProduct = async (req, res, next) => {
 /**
  * Delete product
  */
-export const deleteProduct = async (req, res, next) => {
+export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   
   const product = await models.Product.findByPk(id);
   
   if (!product) {
-    return next(new AppError('Product not found', 404));
+    throw new AppError('Product not found', 404);
   }
   
   await product.destroy();

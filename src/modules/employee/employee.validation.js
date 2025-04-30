@@ -2,11 +2,6 @@
 import Joi from 'joi';
 import { AppError } from '../../middleware/catchError.js';
 
-/**
- * Middleware to validate request data against schema
- * @param {String} schemaName - Name of the validation schema to use
- * @returns {Function} - Express middleware function
- */
 export const validate = (schemaName) => {
   return (req, res, next) => {
     const schema = schemas[schemaName];
@@ -164,5 +159,7 @@ const schemas = {
     termination_date: Joi.date().messages({
       'date.base': 'Termination date must be a valid date',
     }),
+  }).min(1).messages({
+    'object.min': 'At least one field must be provided for update'
   }),
 };

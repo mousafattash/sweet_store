@@ -81,6 +81,8 @@ const schemas = {
         'number.base': 'Base price must be a number',
         'number.positive': 'Base price must be a positive number',
       }),
+  }).min(1).messages({
+    'object.min': 'At least one field must be provided for update'
   }),
 
   // Get product by ID validation

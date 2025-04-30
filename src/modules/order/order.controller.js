@@ -44,7 +44,7 @@ export const getAllOrders = async (req, res) => {
 /**
  * Get order by ID
  */
-export const getOrderById = async (req, res, next) => {
+export const getOrderById = async (req, res) => {
   const { id } = req.params;
   
   // Find order with all related data
@@ -58,12 +58,12 @@ export const getOrderById = async (req, res, next) => {
   });
   
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    throw new AppError('Order not found', 404);
   }
   
   // Check if customer is accessing their own order
   if (req.user.Customer && order.customer_id !== req.user.Customer.customer_id) {
-    return next(new AppError('You do not have permission to view this order', 403));
+    throw new AppError('You do not have permission to view this order', 403);
   }
   
   res.status(200).json({
@@ -77,12 +77,12 @@ export const getOrderById = async (req, res, next) => {
 /**
  * Create new order
  */
-export const createOrder = async (req, res, next) => {
+export const createOrder = async (req, res) => {
   const { total_amount, status, orderItems, shipping_address, shipping_city, shipping_postal_code, shipping_country } = req.body;
   
   // Check if user is a customer
   if (!req.user.Customer) {
-    return next(new AppError('Only customers can create orders', 403));
+    throw new AppError('Only customers can create orders', 403);
   }
   
   // Create order in transaction
@@ -139,7 +139,7 @@ export const createOrder = async (req, res, next) => {
 /**
  * Update order status
  */
-export const updateOrder = async (req, res, next) => {
+export const updateOrder = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   
@@ -147,12 +147,12 @@ export const updateOrder = async (req, res, next) => {
   const order = await models.Order.findByPk(id);
   
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    throw new AppError('Order not found', 404);
   }
   
   // Check if customer is updating their own order
   if (req.user.Customer && order.customer_id !== req.user.Customer.customer_id) {
-    return next(new AppError('You do not have permission to update this order', 403));
+    throw new AppError('You do not have permission to update this order', 403);
   }
   
   // Update shipping status if exists
@@ -176,19 +176,19 @@ export const updateOrder = async (req, res, next) => {
 /**
  * Cancel order
  */
-export const cancelOrder = async (req, res, next) => {
+export const cancelOrder = async (req, res) => {
   const { id } = req.params;
   
   // Find order
   const order = await models.Order.findByPk(id);
   
   if (!order) {
-    return next(new AppError('Order not found', 404));
+    throw new AppError('Order not found', 404);
   }
   
   // Check if customer is cancelling their own order
   if (req.user.Customer && order.customer_id !== req.user.Customer.customer_id) {
-    return next(new AppError('You do not have permission to cancel this order', 403));
+    throw new AppError('You do not have permission to cancel this order', 403);
   }
   
   // Update shipping status if exists
