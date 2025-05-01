@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import models from '../../../DB/models/index.js';
 import { AppError } from '../../middleware/catchError.js';
-import { sendWelcomeEmail, sendPasswordResetEmail } from '../../utils/sendEmail.js';
+import { sendWelcomeEmail, sendPasswordResetEmail, sendVerificationEmail } from '../../utils/sendEmail.js';
 
 /**
  * Generate JWT token
@@ -12,6 +12,13 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '30d',
   });
+};
+
+/**
+ * Generate a 6-digit verification code
+ */
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 /**
@@ -29,6 +36,9 @@ export const register = async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 12);
   
+  // Generate verification code
+  const verificationCode = generateVerificationCode();
+  
   // Create user in transaction
   const result = await models.sequelize.transaction(async (t) => {
     // Create person record
@@ -43,13 +53,15 @@ export const register = async (req, res) => {
     const customer = await models.Customer.create({
       person_id: person.id,
       password: hashedPassword,
+      verification_code: verificationCode,
+      is_verified: false
     }, { transaction: t });
     
     return { person, customer };
   });
   
-  // Send welcome email
-  await sendWelcomeEmail(email, `${first_name} ${last_name}`);
+  // Send verification email
+  await sendVerificationEmail(email, `${first_name} ${last_name}`, verificationCode);
   
   // Generate token
   const token = generateToken(result.person.id);
@@ -65,8 +77,10 @@ export const register = async (req, res) => {
         last_name: result.person.last_name,
         email: result.person.email,
         type: result.person.type,
+        is_verified: false
       },
     },
+    message: 'Registration successful. Please check your email for verification code.'
   });
 };
 
@@ -92,6 +106,11 @@ export const login = async (req, res) => {
     throw new AppError('Incorrect email or password', 401);
   }
   
+  // Check if user is verified
+  if (!person.Customer.is_verified) {
+    throw new AppError('Please verify your email address before logging in', 401);
+  }
+  
   // Generate token
   const token = generateToken(person.id);
   
@@ -106,6 +125,7 @@ export const login = async (req, res) => {
         last_name: person.last_name,
         email: person.email,
         type: person.type,
+        is_verified: person.Customer.is_verified
       },
     },
   });
@@ -295,5 +315,96 @@ export const resetPassword = async (req, res) => {
     status: 'success',
     token: jwtToken,
     message: 'Password reset successful',
+  });
+};
+
+/**
+ * Verify user email with verification code
+ */
+export const verifyEmail = async (req, res) => {
+  const { email, code } = req.body;
+  
+  // Find user by email
+  const person = await models.People.findOne({
+    where: { email },
+    include: [{ model: models.Customer }],
+  });
+  
+  if (!person || !person.Customer) {
+    throw new AppError('User not found', 404);
+  }
+  
+  // Check if already verified
+  if (person.Customer.is_verified) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'Email already verified',
+    });
+  }
+  
+  // Check verification code
+  if (person.Customer.verification_code !== code) {
+    throw new AppError('Invalid verification code', 400);
+  }
+  
+  // Update user to verified status
+  await person.Customer.update({
+    is_verified: true,
+    verification_code: null,
+  });
+  
+  // Generate token
+  const token = generateToken(person.id);
+  
+  // Send welcome email now that they're verified
+  await sendWelcomeEmail(email, `${person.first_name} ${person.last_name}`);
+  
+  // Send response
+  res.status(200).json({
+    status: 'success',
+    token,
+    message: 'Email verified successfully',
+  });
+};
+
+/**
+ * Resend verification code
+ */
+export const resendVerificationCode = async (req, res) => {
+  const { email } = req.body;
+  
+  // Find user by email
+  const person = await models.People.findOne({
+    where: { email },
+    include: [{ model: models.Customer }],
+  });
+  
+  if (!person || !person.Customer) {
+    throw new AppError('User not found', 404);
+  }
+  
+  // Check if already verified
+  if (person.Customer.is_verified) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'Email already verified',
+    });
+  }
+  
+  // Generate new verification code
+  const verificationCode = generateVerificationCode();
+  
+  // Update verification code
+  await person.Customer.update({
+    verification_code: verificationCode,
+  });
+  
+  // Send verification email
+  await sendVerificationEmail(email, `${person.first_name} ${person.last_name}`, verificationCode);
+  
+  // Send response
+  res.status(200).json({
+    status: 'success',
+    message: 'Verification code sent to your email',
   });
 };

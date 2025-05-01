@@ -71,6 +71,29 @@ export const sendWelcomeEmail = async (email, name) => {
 };
 
 /**
+ * Sends a verification email with code
+ * @param {String} email - User's email
+ * @param {String} name - User's name
+ * @param {String} code - Verification code
+ * @returns {Promise<Object>} - Email send result
+ */
+export const sendVerificationEmail = async (email, name, code) => {
+  const subject = 'Verify Your Sweet Store Account';
+  const text = `Hello ${name},\n\nYour verification code is: ${code}\n\nPlease use this code to verify your account.\n\nBest regards,\nThe Sweet Store Team`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Verify Your Sweet Store Account</h2>
+      <p>Hello ${name},</p>
+      <p>Your verification code is: <strong>${code}</strong></p>
+      <p>Please use this code to verify your account.</p>
+      <p>Best regards,<br>The Sweet Store Team</p>
+    </div>
+  `;
+  
+  return sendEmail({ to: email, subject, text, html });
+};
+
+/**
  * Sends a password reset email
  * @param {String} email - User's email
  * @param {String} resetToken - Password reset token

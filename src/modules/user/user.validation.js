@@ -40,6 +40,29 @@ export const validate = (schemaName) => {
 
 // Validation schemas
 const schemas = {
+  // Email verification validation
+  verifyEmail: Joi.object({
+    email: Joi.string().email().required()
+      .messages({
+        'string.empty': 'Email is required',
+        'string.email': 'Please provide a valid email',
+      }),
+    code: Joi.string().length(6).required()
+      .messages({
+        'string.empty': 'Verification code is required',
+        'string.length': 'Verification code must be 6 digits',
+      }),
+  }),
+
+  // Resend verification code validation
+  resendVerificationCode: Joi.object({
+    email: Joi.string().email().required()
+      .messages({
+        'string.empty': 'Email is required',
+        'string.email': 'Please provide a valid email',
+      }),
+  }),
+
   // Register validation
   register: Joi.object({
     first_name: Joi.string().trim().min(2).max(50).required()

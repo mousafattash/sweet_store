@@ -1,10 +1,3 @@
-// Error handling middleware
-
-/**
- * Wraps async controller functions to catch errors and pass them to the global error handler
- * @param {Function} fn - The async controller function to wrap
- * @returns {Function} - Express middleware function
- */
 export const catchError = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch(next);
