@@ -12,12 +12,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/**
- * Uploads a file to Cloudinary
- * @param {String} filePath - Path to the file to upload
- * @param {String} folder - Folder to upload to in Cloudinary
- * @returns {Promise<Object>} - Cloudinary upload response
- */
 export const uploadToCloudinary = async (filePath, folder = 'sweet_store') => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
@@ -30,11 +24,6 @@ export const uploadToCloudinary = async (filePath, folder = 'sweet_store') => {
   }
 };
 
-/**
- * Deletes a file from Cloudinary
- * @param {String} publicId - Public ID of the file to delete
- * @returns {Promise<Object>} - Cloudinary delete response
- */
 export const deleteFromCloudinary = async (publicId) => {
   try {
     const result = await cloudinary.uploader.destroy(publicId);

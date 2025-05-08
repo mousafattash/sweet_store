@@ -5,15 +5,12 @@ import { AppError } from '../middleware/catchError.js';
 
 dotenv.config();
 
-/**
- * Creates a nodemailer transporter
- * @returns {Object} - Nodemailer transporter
- */
 const createTransporter = () => {
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === 'true',
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -21,21 +18,12 @@ const createTransporter = () => {
   });
 };
 
-/**
- * Sends an email
- * @param {Object} options - Email options
- * @param {String} options.to - Recipient email
- * @param {String} options.subject - Email subject
- * @param {String} options.text - Plain text email body
- * @param {String} options.html - HTML email body
- * @returns {Promise<Object>} - Email send result
- */
 export const sendEmail = async ({ to, subject, text, html }) => {
   try {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'Sweet Store <noreply@sweetstore.com>',
+      from: process.env.EMAIL_FROM,
       to,
       subject,
       text,
@@ -49,12 +37,6 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
-/**
- * Sends a welcome email to a new user
- * @param {String} email - User's email
- * @param {String} name - User's name
- * @returns {Promise<Object>} - Email send result
- */
 export const sendWelcomeEmail = async (email, name) => {
   const subject = 'Welcome to Sweet Store!';
   const text = `Hello ${name},\n\nWelcome to Sweet Store! We're excited to have you on board.\n\nBest regards,\nThe Sweet Store Team`;
@@ -70,13 +52,6 @@ export const sendWelcomeEmail = async (email, name) => {
   return sendEmail({ to: email, subject, text, html });
 };
 
-/**
- * Sends a verification email with code
- * @param {String} email - User's email
- * @param {String} name - User's name
- * @param {String} code - Verification code
- * @returns {Promise<Object>} - Email send result
- */
 export const sendVerificationEmail = async (email, name, code) => {
   const subject = 'Verify Your Sweet Store Account';
   const text = `Hello ${name},\n\nYour verification code is: ${code}\n\nPlease use this code to verify your account.\n\nBest regards,\nThe Sweet Store Team`;
@@ -93,13 +68,6 @@ export const sendVerificationEmail = async (email, name, code) => {
   return sendEmail({ to: email, subject, text, html });
 };
 
-/**
- * Sends a password reset email
- * @param {String} email - User's email
- * @param {String} resetToken - Password reset token
- * @param {String} resetUrl - Password reset URL
- * @returns {Promise<Object>} - Email send result
- */
 export const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
   const subject = 'Password Reset Request';
   const text = `You requested a password reset. Please use the following token: ${resetToken}\n\nOr click this link: ${resetUrl}\n\nIf you didn't request this, please ignore this email.`;
