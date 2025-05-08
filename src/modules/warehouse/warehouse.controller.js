@@ -1,4 +1,6 @@
 // Warehouse controller functions
+
+
 import models from '../../../DB/models/index.js';
 import { AppError } from '../../middleware/catchError.js';
 
