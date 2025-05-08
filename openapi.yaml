@@ -1,0 +1,3234 @@
+openapi: 3.0.0
+info:
+  title: Sweet Store
+  description: |
+    API documentation for Sweet Store application.
+    This API allows users to manage products, orders, inventory, and more.
+  version: 1.0.0
+  contact:
+    name: Sweet Store Support
+    email: support@sweetstore.com
+
+tags:
+  - name: Users
+    description: User management operations
+  - name: Products
+    description: Product management operations
+  - name: Orders
+    description: Order management operations
+  - name: Branches
+    description: Branch management operations
+  - name: Inventory
+    description: Inventory management operations
+  - name: Employees
+    description: Employee management operations
+  - name: Vehicles
+    description: Vehicle management operations
+  - name: Warehouses
+    description: Warehouse management operations
+  - name: Vendors
+    description: Vendor management operations
+  - name: Raw Materials
+    description: Raw material management operations
+  - name: Agencies
+    description: Agency management operations
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Invalid input data
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        type:
+          type: string
+          example: person
+        is_verified:
+          type: boolean
+          example: true
+          
+    # Vehicle schemas
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        vin:
+          type: string
+          example: "1HGCM82633A123456"
+        plate_number:
+          type: string
+          example: "ABC-1234"
+        make:
+          type: string
+          example: "Toyota"
+        model:
+          type: string
+          example: "Corolla"
+        year:
+          type: integer
+          example: 2022
+        mileage:
+          type: integer
+          example: 15000
+        acquisition_type:
+          type: string
+          example: "purchase"
+        acquisition_date:
+          type: string
+          format: date
+          example: "2022-01-15"
+        purchase_price:
+          type: number
+          format: float
+          example: 25000.00
+        notes:
+          type: string
+          example: "Regular maintenance performed"
+        agency:
+          $ref: '#/components/schemas/Agency'
+          
+    VehicleInput:
+      type: object
+      required:
+        - plate_number
+        - make
+        - model
+        - year
+      properties:
+        vin:
+          type: string
+          example: "1HGCM82633A123456"
+        plate_number:
+          type: string
+          example: "ABC-1234"
+        make:
+          type: string
+          example: "Toyota"
+        model:
+          type: string
+          example: "Corolla"
+        year:
+          type: integer
+          example: 2022
+        mileage:
+          type: integer
+          example: 15000
+        acquisition_type:
+          type: string
+          example: "purchase"
+        acquisition_date:
+          type: string
+          format: date
+          example: "2022-01-15"
+        purchase_price:
+          type: number
+          format: float
+          example: 25000.00
+        notes:
+          type: string
+          example: "Regular maintenance performed"
+        org_id:
+          type: integer
+          example: 1
+          
+    # Warehouse schemas
+    Warehouse:
+      type: object
+      properties:
+        warehouse_id:
+          type: integer
+          example: 1
+        phone_number:
+          type: string
+          example: "+1-555-123-4567"
+        address:
+          type: string
+          example: "123 Storage Ave, Warehouse District"
+        stockEntries:
+          type: array
+          items:
+            type: object
+            properties:
+              raw_material_id:
+                type: integer
+              quantity:
+                type: integer
+              
+    WarehouseInput:
+      type: object
+      required:
+        - address
+      properties:
+        phone_number:
+          type: string
+          example: "+1-555-123-4567"
+        address:
+          type: string
+          example: "123 Storage Ave, Warehouse District"
+          
+    # Vendor schemas
+    Vendor:
+      type: object
+      properties:
+        vendor_id:
+          type: integer
+          example: 1
+        vendor_name:
+          type: string
+          example: "Sweet Supplies Inc."
+        phone:
+          type: string
+          example: "+1-555-987-6543"
+        email:
+          type: string
+          format: email
+          example: "contact@sweetsupplies.com"
+        address:
+          type: string
+          example: "456 Supplier St, Vendor Valley"
+        country:
+          type: string
+          example: "United States"
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/RawMaterial'
+            
+    VendorInput:
+      type: object
+      required:
+        - vendor_name
+      properties:
+        vendor_name:
+          type: string
+          example: "Sweet Supplies Inc."
+        phone:
+          type: string
+          example: "+1-555-987-6543"
+        email:
+          type: string
+          format: email
+          example: "contact@sweetsupplies.com"
+        address:
+          type: string
+          example: "456 Supplier St, Vendor Valley"
+        country:
+          type: string
+          example: "United States"
+          
+    # Raw Material schemas
+    RawMaterial:
+      type: object
+      properties:
+        raw_material_id:
+          type: integer
+          example: 1
+        material_name:
+          type: string
+          example: "Organic Sugar"
+        last_updated:
+          type: string
+          format: date-time
+          example: "2023-05-20T14:30:00Z"
+        description:
+          type: string
+          example: "High-quality organic cane sugar"
+        vendor:
+          $ref: '#/components/schemas/Vendor'
+            
+    RawMaterialInput:
+      type: object
+      required:
+        - material_name
+      properties:
+        material_name:
+          type: string
+          example: "Organic Sugar"
+        description:
+          type: string
+          example: "High-quality organic cane sugar"
+        vendor_id:
+          type: integer
+          example: 1
+          
+    # Agency schemas
+    Agency:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Delivery Partners LLC"
+        contact_info:
+          type: string
+          example: "Phone: +1-555-789-0123, Email: info@deliverypartners.com"
+        vehicles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vehicle'
+            
+    AgencyInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Delivery Partners LLC"
+        contact_info:
+          type: string
+          example: "Phone: +1-555-789-0123, Email: info@deliverypartners.com"
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        product_name:
+          type: string
+          example: Chocolate Cake
+        description:
+          type: string
+          example: Delicious chocolate cake with cream filling
+        base_price:
+          type: number
+          format: float
+          example: 25.99
+
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: integer
+          example: 1
+        customer_id:
+          type: integer
+          example: 1
+        discount:
+          type: number
+          format: float
+          example: 0
+        address:
+          type: string
+          example: 123 Main St
+        deposit_amount:
+          type: number
+          format: float
+          example: 50.00
+        deposit_paid:
+          type: number
+          format: float
+          example: 0
+
+    OrderDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        order_id:
+          type: integer
+          example: 1
+        product_id:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          example: 2
+        date:
+          type: string
+          format: date
+          example: 2023-01-01
+        time:
+          type: string
+          example: 14:30:00
+
+    ShippingDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        order_id:
+          type: integer
+          example: 1
+        address:
+          type: string
+          example: 123 Main St
+        city:
+          type: string
+          example: New York
+        postal_code:
+          type: string
+          example: 10001
+        country:
+          type: string
+          example: USA
+        status:
+          type: string
+          enum: [pending, processing, shipped, delivered, cancelled]
+          example: pending
+
+paths:
+  /:
+    get:
+      summary: API root endpoint
+      description: Returns a welcome message
+      responses:
+        '200':
+          description: Welcome message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Welcome to Sweet Store API
+
+  # User Endpoints
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      description: Creates a new user account and sends verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+              properties:
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+                type:
+                  type: string
+                  example: person
+                  default: person
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  token:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                    example: Registration successful. Please check your email for verification code.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: Login user
+      description: Authenticates a user and returns a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  token:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/verify:
+    post:
+      tags:
+        - Users
+      summary: Verify email
+      description: Verifies user email with verification code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - code
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                code:
+                  type: string
+                  example: 123456
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  token:
+                    type: string
+                  message:
+                    type: string
+                    example: Email verified successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/resend-code:
+    post:
+      tags:
+        - Users
+      summary: Resend verification code
+      description: Resends verification code to user email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+      responses:
+        '200':
+          description: Verification code sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Verification code sent to your email
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/forgot-password:
+    post:
+      tags:
+        - Users
+      summary: Forgot password
+      description: Sends password reset token to user email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+      responses:
+        '200':
+          description: Reset token sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Token sent to email
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/reset-password/{token}:
+    post:
+      tags:
+        - Users
+      summary: Reset password
+      description: Resets user password with token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: NewPassword123!
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  token:
+                    type: string
+                  message:
+                    type: string
+                    example: Password reset successful
+        '400':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Get user profile
+      description: Returns current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Updates current user profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/change-password:
+    patch:
+      tags:
+        - Users
+      summary: Change password
+      description: Changes current user password
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  example: Password123!
+                newPassword:
+                  type: string
+                  format: password
+                  example: NewPassword123!
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  token:
+                    type: string
+                  message:
+                    type: string
+                    example: Password updated successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Product Endpoints
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      description: Returns a list of all products
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 10
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - Products
+      summary: Create product
+      description: Creates a new product (employee only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product_name
+                - base_price
+              properties:
+                product_name:
+                  type: string
+                  example: Chocolate Cake
+                description:
+                  type: string
+                  example: Delicious chocolate cake with cream filling
+                base_price:
+                  type: number
+                  format: float
+                  example: 25.99
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      product:
+                        $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product
+      description: Returns a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      product:
+                        $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Products
+      summary: Update product
+      description: Updates a product (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_name:
+                  type: string
+                  example: Chocolate Cake Deluxe
+                description:
+                  type: string
+                  example: Delicious chocolate cake with premium cream filling
+                base_price:
+                  type: number
+                  format: float
+                  example: 29.99
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      product:
+                        $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Products
+      summary: Delete product
+      description: Deletes a product (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Order Endpoints
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Get all orders
+      description: Returns all orders (for customers, only their own orders)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 5
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Orders
+      summary: Create order
+      description: Creates a new order (customer only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - total_amount
+                - orderItems
+              properties:
+                total_amount:
+                  type: number
+                  format: float
+                  example: 50.00
+                status:
+                  type: string
+                  example: pending
+                orderItems:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 1
+                      quantity:
+                        type: integer
+                        example: 2
+                shipping_address:
+                  type: string
+                  example: 123 Main St
+                shipping_city:
+                  type: string
+                  example: New York
+                shipping_postal_code:
+                  type: string
+                  example: 10001
+                shipping_country:
+                  type: string
+                  example: USA
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/Order'
+                      orderDetails:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderDetail'
+                      shipping:
+                        $ref: '#/components/schemas/ShippingDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /orders/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get order
+      description: Returns an order by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Orders
+      summary: Update order
+      description: Updates an order status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [pending, processing, shipped, delivered, cancelled]
+                  example: processing
+      responses:
+        '200':
+          description: Order updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/Order'
+                      shipping:
+                        $ref: '#/components/schemas/ShippingDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /orders/{id}/cancel:
+    delete:
+      tags:
+        - Orders
+      summary: Cancel order
+      description: Cancels an existing order
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Order cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/Order'
+                      shipping:
+                        $ref: '#/components/schemas/ShippingDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Branch Endpoints
+  /branches:
+    get:
+      tags:
+        - Branches
+      summary: Get all branches
+      description: Returns a list of all branches
+      responses:
+        '200':
+          description: List of branches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 5
+                  data:
+                    type: object
+                    properties:
+                      branches:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: Downtown Branch
+                            address:
+                              type: string
+                              example: 123 Main St, New York, 10001, USA
+                            phone:
+                              type: string
+                              example: +1234567890
+                            email:
+                              type: string
+                              example: downtown@sweetstore.com
+    post:
+      tags:
+        - Branches
+      summary: Create branch
+      description: Creates a new branch (employee only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - branch_name
+                - address
+                - city
+                - country
+                - phone
+              properties:
+                branch_name:
+                  type: string
+                  example: Downtown Branch
+                address:
+                  type: string
+                  example: 123 Main St
+                city:
+                  type: string
+                  example: New York
+                postal_code:
+                  type: string
+                  example: 10001
+                country:
+                  type: string
+                  example: USA
+                phone:
+                  type: string
+                  example: +1234567890
+                email:
+                  type: string
+                  example: downtown@sweetstore.com
+      responses:
+        '201':
+          description: Branch created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      branch:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: Downtown Branch
+                          address:
+                            type: string
+                            example: 123 Main St, New York, 10001, USA
+                          phone:
+                            type: string
+                            example: +1234567890
+                          email:
+                            type: string
+                            example: downtown@sweetstore.com
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /branches/{id}:
+    get:
+      tags:
+        - Branches
+      summary: Get branch
+      description: Returns a branch by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Branch details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      branch:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: Downtown Branch
+                          address:
+                            type: string
+                            example: 123 Main St, New York, 10001, USA
+                          phone:
+                            type: string
+                            example: +1234567890
+                          email:
+                            type: string
+                            example: downtown@sweetstore.com
+                          inventories:
+                            type: array
+                            items:
+                              type: object
+                          expenses:
+                            type: array
+                            items:
+                              type: object
+        '404':
+          description: Branch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Branches
+      summary: Update branch
+      description: Updates a branch (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                branch_name:
+                  type: string
+                  example: Downtown Branch Updated
+                address:
+                  type: string
+                  example: 456 Main St
+                city:
+                  type: string
+                  example: New York
+                postal_code:
+                  type: string
+                  example: 10002
+                country:
+                  type: string
+                  example: USA
+                phone:
+                  type: string
+                  example: +1987654321
+                email:
+                  type: string
+                  example: downtown.updated@sweetstore.com
+      responses:
+        '200':
+          description: Branch updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      branch:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: Downtown Branch Updated
+                          address:
+                            type: string
+                            example: 456 Main St, New York, 10002, USA
+                          phone:
+                            type: string
+                            example: +1987654321
+                          email:
+                            type: string
+                            example: downtown.updated@sweetstore.com
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Branch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Branches
+      summary: Delete branch
+      description: Deletes a branch (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Branch deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Branch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Inventory Endpoints
+  /inventory:
+    get:
+      tags:
+        - Inventory
+      summary: Get all inventory
+      description: Returns a list of all inventory items (employee only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 10
+                  data:
+                    type: object
+                    properties:
+                      inventory:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            branch_id:
+                              type: integer
+                              example: 1
+                            raw_material_id:
+                              type: integer
+                              example: 1
+                            quantity:
+                              type: integer
+                              example: 100
+                            branch:
+                              type: object
+                            rawMaterial:
+                              type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Inventory
+      summary: Update inventory
+      description: Updates inventory quantity (creates if not exists) (employee only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - branch_id
+                - raw_material_id
+                - quantity
+              properties:
+                branch_id:
+                  type: integer
+                  example: 1
+                raw_material_id:
+                  type: integer
+                  example: 1
+                quantity:
+                  type: integer
+                  example: 100
+      responses:
+        '200':
+          description: Inventory updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      inventory:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          branch_id:
+                            type: integer
+                            example: 1
+                          raw_material_id:
+                            type: integer
+                            example: 1
+                          quantity:
+                            type: integer
+                            example: 100
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Branch or raw material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /inventory/branch/{branch_id}:
+    get:
+      tags:
+        - Inventory
+      summary: Get inventory by branch
+      description: Returns inventory items for a specific branch (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: branch_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Branch inventory
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 5
+                  data:
+                    type: object
+                    properties:
+                      branch:
+                        type: object
+                      inventory:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            branch_id:
+                              type: integer
+                              example: 1
+                            raw_material_id:
+                              type: integer
+                              example: 1
+                            quantity:
+                              type: integer
+                              example: 100
+                            rawMaterial:
+                              type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Branch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /inventory/material/{material_id}:
+    get:
+      tags:
+        - Inventory
+      summary: Get inventory by material
+      description: Returns inventory items for a specific raw material (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: material_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Material inventory
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 3
+                  data:
+                    type: object
+                    properties:
+                      material:
+                        type: object
+                      inventory:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            branch_id:
+                              type: integer
+                              example: 1
+                            raw_material_id:
+                              type: integer
+                              example: 1
+                            quantity:
+                              type: integer
+                              example: 100
+                            branch:
+                              type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Raw material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /inventory/{branch_id}/{raw_material_id}:
+    delete:
+      tags:
+        - Inventory
+      summary: Delete inventory
+      description: Deletes an inventory item (employee only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: branch_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: raw_material_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Inventory deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Inventory not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Employee Endpoints
+  /employees:
+    get:
+      tags:
+        - Employees
+      summary: Get all employees
+      description: Returns a list of all employees (admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 5
+                  data:
+                    type: object
+                    properties:
+                      employees:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            identity_card:
+                              type: string
+                              example: ID12345678
+                            hire_date:
+                              type: string
+                              format: date
+                              example: 2023-01-01
+                            hourly_wage:
+                              type: number
+                              format: float
+                              example: 15.50
+                            termination_date:
+                              type: string
+                              format: date
+                              example: null
+                            branch_id:
+                              type: integer
+                              example: 1
+                            role_id:
+                              type: integer
+                              example: 1
+                            person:
+                              type: object
+                            branch:
+                              type: object
+                            role:
+                              type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Employees
+      summary: Create employee
+      description: Creates a new employee (admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identity_card
+                - first_name
+                - last_name
+                - email
+                - password
+                - hourly_wage
+                - branch_id
+                - role_id
+              properties:
+                identity_card:
+                  type: string
+                  example: ID12345678
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+                phone_number:
+                  type: string
+                  example: +1234567890
+                address:
+                  type: object
+                  properties:
+                    street:
+                      type: string
+                      example: 123 Main St
+                    city:
+                      type: string
+                      example: New York
+                    state:
+                      type: string
+                      example: NY
+                    postal_code:
+                      type: string
+                      example: 10001
+                    country:
+                      type: string
+                      example: USA
+                hire_date:
+                  type: string
+                  format: date
+                  example: 2023-01-01
+                hourly_wage:
+                  type: number
+                  format: float
+                  example: 15.50
+                branch_id:
+                  type: integer
+                  example: 1
+                role_id:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      employee:
+                        type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /employees/{id}:
+    get:
+      tags:
+        - Employees
+      summary: Get employee
+      description: Returns an employee by ID (admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      employee:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          identity_card:
+                            type: string
+                            example: ID12345678
+                          hire_date:
+                            type: string
+                            format: date
+                            example: 2023-01-01
+                          hourly_wage:
+                            type: number
+                            format: float
+                            example: 15.50
+                          termination_date:
+                            type: string
+                            format: date
+                            example: null
+                          branch_id:
+                            type: integer
+                            example: 1
+                          role_id:
+                            type: integer
+                            example: 1
+                          person:
+                            type: object
+                          branch:
+                            type: object
+                          role:
+                            type: object
+                          shifts:
+                            type: array
+                            items:
+                              type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Employees
+      summary: Update employee
+      description: Updates an employee (admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                phone_number:
+                  type: string
+                  example: +1234567890
+                address:
+                  type: object
+                  properties:
+                    street:
+                      type: string
+                      example: 123 Main St
+                    city:
+                      type: string
+                      example: New York
+                    state:
+                      type: string
+                      example: NY
+                    postal_code:
+                      type: string
+                      example: 10001
+                    country:
+                      type: string
+                      example: USA
+                hourly_wage:
+                  type: number
+                  format: float
+                  example: 16.50
+                branch_id:
+                  type: integer
+                  example: 2
+                role_id:
+                  type: integer
+                  example: 2
+                termination_date:
+                  type: string
+                  format: date
+                  example: 2023-12-31
+      responses:
+        '200':
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      employee:
+                        type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Employees
+      summary: Delete employee
+      description: Deletes an employee (admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Employee deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Vehicle Endpoints
+  /vehicles:
+    get:
+      summary: Get all vehicles
+      description: Retrieve a list of all vehicles
+      tags:
+        - Vehicles
+      responses:
+        '200':
+          description: A list of vehicles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 10
+                  data:
+                    type: object
+                    properties:
+                      vehicles:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Vehicle'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new vehicle
+      description: Add a new vehicle to the system
+      tags:
+        - Vehicles
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '201':
+          description: Vehicle created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vehicle:
+                        $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /vehicles/{id}:
+    get:
+      summary: Get vehicle by ID
+      description: Retrieve a specific vehicle by its ID
+      tags:
+        - Vehicles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vehicle ID
+      responses:
+        '200':
+          description: Vehicle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vehicle:
+                        $ref: '#/components/schemas/Vehicle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update vehicle
+      description: Update an existing vehicle's information
+      tags:
+        - Vehicles
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vehicle ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '200':
+          description: Vehicle updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vehicle:
+                        $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete vehicle
+      description: Remove a vehicle from the system
+      tags:
+        - Vehicles
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vehicle ID
+      responses:
+        '204':
+          description: Vehicle deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Warehouse Endpoints
+  /warehouses:
+    get:
+      summary: Get all warehouses
+      description: Retrieve a list of all warehouses
+      tags:
+        - Warehouses
+      responses:
+        '200':
+          description: A list of warehouses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 5
+                  data:
+                    type: object
+                    properties:
+                      warehouses:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Warehouse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new warehouse
+      description: Add a new warehouse to the system
+      tags:
+        - Warehouses
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseInput'
+      responses:
+        '201':
+          description: Warehouse created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      warehouse:
+                        $ref: '#/components/schemas/Warehouse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /warehouses/{id}:
+    get:
+      summary: Get warehouse by ID
+      description: Retrieve a specific warehouse by its ID
+      tags:
+        - Warehouses
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Warehouse ID
+      responses:
+        '200':
+          description: Warehouse details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      warehouse:
+                        $ref: '#/components/schemas/Warehouse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update warehouse
+      description: Update an existing warehouse's information
+      tags:
+        - Warehouses
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Warehouse ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseInput'
+      responses:
+        '200':
+          description: Warehouse updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      warehouse:
+                        $ref: '#/components/schemas/Warehouse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete warehouse
+      description: Remove a warehouse from the system
+      tags:
+        - Warehouses
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Warehouse ID
+      responses:
+        '204':
+          description: Warehouse deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Vendor Endpoints
+  /vendors:
+    get:
+      summary: Get all vendors
+      description: Retrieve a list of all vendors
+      tags:
+        - Vendors
+      responses:
+        '200':
+          description: A list of vendors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 8
+                  data:
+                    type: object
+                    properties:
+                      vendors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Vendor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new vendor
+      description: Add a new vendor to the system
+      tags:
+        - Vendors
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '201':
+          description: Vendor created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vendor:
+                        $ref: '#/components/schemas/Vendor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /vendors/{id}:
+    get:
+      summary: Get vendor by ID
+      description: Retrieve a specific vendor by its ID
+      tags:
+        - Vendors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vendor ID
+      responses:
+        '200':
+          description: Vendor details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vendor:
+                        $ref: '#/components/schemas/Vendor'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update vendor
+      description: Update an existing vendor's information
+      tags:
+        - Vendors
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vendor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '200':
+          description: Vendor updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      vendor:
+                        $ref: '#/components/schemas/Vendor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete vendor
+      description: Remove a vendor from the system
+      tags:
+        - Vendors
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vendor ID
+      responses:
+        '204':
+          description: Vendor deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Raw Material Endpoints
+  /raw-materials:
+    get:
+      summary: Get all raw materials
+      description: Retrieve a list of all raw materials
+      tags:
+        - Raw Materials
+      responses:
+        '200':
+          description: A list of raw materials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 15
+                  data:
+                    type: object
+                    properties:
+                      rawMaterials:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RawMaterial'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new raw material
+      description: Add a new raw material to the system
+      tags:
+        - Raw Materials
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RawMaterialInput'
+      responses:
+        '201':
+          description: Raw material created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      rawMaterial:
+                        $ref: '#/components/schemas/RawMaterial'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /raw-materials/{id}:
+    get:
+      summary: Get raw material by ID
+      description: Retrieve a specific raw material by its ID
+      tags:
+        - Raw Materials
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Raw Material ID
+      responses:
+        '200':
+          description: Raw material details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      rawMaterial:
+                        $ref: '#/components/schemas/RawMaterial'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update raw material
+      description: Update an existing raw material's information
+      tags:
+        - Raw Materials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Raw Material ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RawMaterialInput'
+      responses:
+        '200':
+          description: Raw material updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      rawMaterial:
+                        $ref: '#/components/schemas/RawMaterial'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete raw material
+      description: Remove a raw material from the system
+      tags:
+        - Raw Materials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Raw Material ID
+      responses:
+        '204':
+          description: Raw material deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Agency Endpoints
+  /agencies:
+    get:
+      summary: Get all agencies
+      description: Retrieve a list of all agencies
+      tags:
+        - Agencies
+      responses:
+        '200':
+          description: A list of agencies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 6
+                  data:
+                    type: object
+                    properties:
+                      agencies:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Agency'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new agency
+      description: Add a new agency to the system
+      tags:
+        - Agencies
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyInput'
+      responses:
+        '201':
+          description: Agency created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      agency:
+                        $ref: '#/components/schemas/Agency'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /agencies/{id}:
+    get:
+      summary: Get agency by ID
+      description: Retrieve a specific agency by its ID
+      tags:
+        - Agencies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Agency ID
+      responses:
+        '200':
+          description: Agency details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      agency:
+                        $ref: '#/components/schemas/Agency'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update agency
+      description: Update an existing agency's information
+      tags:
+        - Agencies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Agency ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyInput'
+      responses:
+        '200':
+          description: Agency updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      agency:
+                        $ref: '#/components/schemas/Agency'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete agency
+      description: Remove an agency from the system
+      tags:
+        - Agencies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Agency ID
+      responses:
+        '204':
+          description: Agency deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
